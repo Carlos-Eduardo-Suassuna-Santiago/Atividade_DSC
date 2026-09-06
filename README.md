@@ -13,8 +13,18 @@ Criação de um `CalculadoraController` que realiza operações matemáticas atr
 ## 🚀 Tecnologias Utilizadas
 - **Java 21 (LTS)**
 - **Spring Boot 4 / Spring Web**
+- **Springdoc OpenAPI (Swagger UI)**
+- **Interface Web Moderna (HTML5, CSS3, JavaScript Vanilla)**
 - **Maven Wrapper (`mvnw`, `mvnw.cmd`)**
 - **JUnit 5 / MockMvc**
+
+---
+
+## 🖥️ Como Acessar a Interface Gráfica e Swagger
+
+Com a aplicação rodando, basta abrir no navegador:
+- **Interface Web Interativa (Calculadora Visual):** [http://localhost:8080](http://localhost:8080)
+- **Documentação Interativa Swagger UI:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ---
 
