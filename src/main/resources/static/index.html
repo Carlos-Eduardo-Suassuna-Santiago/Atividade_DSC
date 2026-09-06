@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora API — IFRN DSC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(99, 102, 241, 0.4);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.25);
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 16px 24px;
+        }
+
+        .header-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--primary-glow);
+            font-size: 22px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text span {
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-swagger {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #85e89d;
+            background: rgba(46, 160, 67, 0.15);
+            border: 1px solid rgba(46, 160, 67, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-swagger:hover {
+            background: rgba(46, 160, 67, 0.25);
+            border-color: #2ea043;
+            transform: translateY(-1px);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Main container */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 6px;
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 28px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
+            font-weight: 600;
+        }
+
+        /* Tab Content Panel */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Layout */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(16px);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .badge-endpoint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #a5b4fc;
+        }
+
+        /* Form elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #d1d5db;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"], select {
+            background: rgba(11, 15, 25, 0.8);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Operation Selector Buttons */
+        .op-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .op-btn {
+            background: rgba(11, 15, 25, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .op-btn .op-symbol {
+            font-size: 1.4rem;
+            color: var(--accent);
+        }
+
+        .op-btn:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .op-btn.selected {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 16px var(--primary-glow);
+        }
+
+        .op-btn.selected .op-symbol {
+            color: #fff;
+        }
+
+        /* Action Buttons */
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Result Display Box */
+        .result-box {
+            margin-top: 24px;
+            background: rgba(11, 15, 25, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .result-box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .request-url {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            word-break: break-all;
+            padding: 8px 16px;
+            background: rgba(6, 182, 212, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .method-tag {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.72rem;
+        }
+
+        .result-content {
+            padding: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #f1f5f9;
+        }
+
+        /* Metric Cards for Analysis */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: rgba(11, 15, 25, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .metric-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+        }
+
+        /* Grade Status Banner */
+        .status-banner {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 1px solid transparent;
+        }
+
+        .status-banner.aprovado {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+
+        .status-banner.recuperacao {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+        }
+
+        .status-banner.reprovado {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 640px) {
+            .op-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-area">
+                <div class="logo-badge">🧮</div>
+                <div class="logo-text">
+                    <h1>Calculadora Spring Boot</h1>
+                    <span>IFRN · DESENVOLVIMENTO DE SISTEMAS CORPORATIVOS</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    API Online
+                </div>
+                <a href="/swagger-ui/index.html" target="_blank" class="btn-swagger">
+                    <span>⚡</span> Swagger / OpenAPI
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Tabs Navigation -->
+        <nav class="tabs" role="tablist">
+            <button class="tab-btn active" onclick="switchTab('tab-calcular')">
+                <span>⚡</span> Endpoint Único (Cálculo)
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-diretos')">
+                <span>➕</span> Soma & Subtração
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-par-impar')">
+                <span>⚖️</span> Par ou Ímpar
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-analise')">
+                <span>📊</span> Análise de Número
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-media')">
+                <span>🎓</span> Cálculo de Média
+            </button>
+        </nav>
+
+        <!-- Tab 1: Endpoint Único -->
+        <section id="tab-calcular" class="tab-panel active">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Endpoint Único de Cálculo</div>
+                        <div class="card-desc">Operação via <code>@PathVariable</code> e números via <code>@RequestParam</code></div>
+                    </div>
+                    <span class="badge-endpoint">GET /calculadora/calcular/{operacao}</span>
+                </div>
+
+                <label>Selecione a Operação:</label>
+                <div class="op-buttons" style="margin-top: 8px;">
+                    <button type="button" class="op-btn selected" data-op="somar" onclick="selectOp(this, 'somar')">
+                        <span class="op-symbol">+</span>
+                        <span>Somar</span>
+                    </button>
+                    <button type="button" class="op-btn" data-op="subtrair" onclick="selectOp(this, 'subtrair')">
+                        <span class="op-symbol">−</span>
+                        <span>Subtrair</span>
+                    </button>
+                    <button type="button" class="op-btn" data-op="multiplicar" onclick="selectOp(this, 'multiplicar')">
+                        <span class="op-symbol">×</span>
+                        <span>Multiplicar</span>
+                    </button>
+                    <button type="button" class="op-btn" data-op="dividir" onclick="selectOp(this, 'dividir')">
+                        <span class="op-symbol">÷</span>
+                        <span>Dividir</span>
+                    </button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="calc-num1">Número 1</label>
+                        <input type="number" id="calc-num1" value="10" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-num2">Número 2</label>
+                        <input type="number" id="calc-num2" value="5" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-casas">Casas Decimais (Opcional)</label>
+                        <input type="number" id="calc-casas" value="2" min="0" max="10">
+                    </div>
+                </div>
+
+                <button class="btn-submit" onclick="executarCalculoUnico()">
+                    <span>Calcular Agora</span>
+                </button>
+
+                <div id="result-box-calcular" class="result-box" style="display: none;">
+                    <div class="request-url">
+                        <span class="method-tag">GET</span>
+                        <span id="url-calcular"></span>
+                    </div>
+                    <div class="result-content" id="content-calcular"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Soma & Subtração Diretas -->
+        <section id="tab-diretos" class="tab-panel">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                <!-- Soma -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">1. Soma com @PathVariable</div>
+                            <div class="card-desc">Parâmetros passados diretamente na rota</div>
+                        </div>
+                        <span class="badge-endpoint">GET /somar/{n1}/{n2}</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="soma-num1">Número 1</label>
+                            <input type="number" id="soma-num1" value="10" step="any">
+                        </div>
+                        <div class="form-group">
+                            <label for="soma-num2">Número 2</label>
+                            <input type="number" id="soma-num2" value="5" step="any">
+                        </div>
+                    </div>
+
+                    <button class="btn-submit" onclick="executarSoma()">Somar</button>
+
+                    <div id="result-box-soma" class="result-box" style="display: none;">
+                        <div class="request-url">
+                            <span class="method-tag">GET</span>
+                            <span id="url-soma"></span>
+                        </div>
+                        <div class="result-content" id="content-soma"></div>
+                    </div>
+                </div>
+
+                <!-- Subtração -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">2. Subtração com @RequestParam</div>
+                            <div class="card-desc">Parâmetros passados via query string</div>
+                        </div>
+                        <span class="badge-endpoint">GET /subtrair?numero1=..&numero2=..</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sub-num1">Número 1</label>
+                            <input type="number" id="sub-num1" value="20" step="any">
+                        </div>
+                        <div class="form-group">
+                            <label for="sub-num2">Número 2</label>
+                            <input type="number" id="sub-num2" value="8" step="any">
+                        </div>
+                    </div>
+
+                    <button class="btn-submit" onclick="executarSubtracao()">Subtrair</button>
+
+                    <div id="result-box-sub" class="result-box" style="display: none;">
+                        <div class="request-url">
+                            <span class="method-tag">GET</span>
+                            <span id="url-sub"></span>
+                        </div>
+                        <div class="result-content" id="content-sub"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Par ou Ímpar -->
+        <section id="tab-par-impar" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">4. Verificação de Par ou Ímpar</div>
+                        <div class="card-desc">Recebe um número inteiro via <code>@PathVariable</code></div>
+                    </div>
+                    <span class="badge-endpoint">GET /calculadora/par-ou-impar/{numero}</span>
+                </div>
+
+                <div class="form-group" style="max-width: 320px; margin-bottom: 20px;">
+                    <label for="par-num">Digite um Número</label>
+                    <input type="number" id="par-num" value="10" step="1">
+                </div>
+
+                <button class="btn-submit" style="max-width: 320px;" onclick="executarParOuImpar()">Verificar</button>
+
+                <div id="result-box-par" class="result-box" style="display: none; max-width: 480px;">
+                    <div class="request-url">
+                        <span class="method-tag">GET</span>
+                        <span id="url-par"></span>
+                    </div>
+                    <div class="result-content" style="font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--accent);" id="content-par"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: Análise de Número -->
+        <section id="tab-analise" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">5. Análise Completa de Número</div>
+                        <div class="card-desc">Calcula paridade, sinal, dobro, metade e quadrado</div>
+                    </div>
+                    <span class="badge-endpoint">GET /calculadora/analisar/{numero}</span>
+                </div>
+
+                <div class="form-group" style="max-width: 320px; margin-bottom: 20px;">
+                    <label for="analise-num">Número para Análise</label>
+                    <input type="number" id="analise-num" value="10" step="any">
+                </div>
+
+                <button class="btn-submit" style="max-width: 320px;" onclick="executarAnalise()">Analisar</button>
+
+                <div id="result-box-analise" class="result-box" style="display: none;">
+                    <div class="request-url">
+                        <span class="method-tag">GET</span>
+                        <span id="url-analise"></span>
+                    </div>
+                    <div class="result-content" id="content-analise" style="margin-bottom: 12px;"></div>
+                </div>
+
+                <div id="metrics-analise" class="metrics-grid" style="display: none;">
+                    <div class="metric-card">
+                        <span class="metric-label">Paridade</span>
+                        <span class="metric-value" id="metric-paridade">-</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Sinal</span>
+                        <span class="metric-value" id="metric-sinal">-</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Dobro</span>
+                        <span class="metric-value" id="metric-dobro">-</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Metade</span>
+                        <span class="metric-value" id="metric-metade">-</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Quadrado</span>
+                        <span class="metric-value" id="metric-quadrado">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 5: Média de Notas -->
+        <section id="tab-media" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">6. Desafio — Cálculo de Média Escolar</div>
+                        <div class="card-desc">Recebe 3 notas por <code>@RequestParam</code> e avalia a situação escolar</div>
+                    </div>
+                    <span class="badge-endpoint">GET /calculadora/media?nota1=..&nota2=..&nota3=..</span>
+                </div>
+
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="form-group">
+                        <label for="nota1">Nota 1</label>
+                        <input type="number" id="nota1" value="7" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="nota2">Nota 2</label>
+                        <input type="number" id="nota2" value="8" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="nota3">Nota 3</label>
+                        <input type="number" id="nota3" value="6" min="0" max="10" step="0.1">
+                    </div>
+                </div>
+
+                <button class="btn-submit" onclick="executarMedia()">Calcular Média</button>
+
+                <div id="result-box-media" class="result-box" style="display: none;">
+                    <div class="request-url">
+                        <span class="method-tag">GET</span>
+                        <span id="url-media"></span>
+                    </div>
+                    <div class="result-content" id="content-media"></div>
+                </div>
+
+                <div id="banner-media" class="status-banner" style="display: none;">
+                    <span id="banner-text"></span>
+                    <span id="banner-badge" style="font-size: 0.9rem; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.1);"></span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Desenvolvimento de Sistemas Corporativos · IFRN · Prof. Jeferson Queiroga
+    </footer>
+
+    <script>
+        let currentOp = 'somar';
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+            
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) targetPanel.classList.add('active');
+        }
+
+        function selectOp(button, op) {
+            document.querySelectorAll('.op-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            currentOp = op;
+        }
+
+        async function fetchEndpoint(url, boxId, urlSpanId, contentId) {
+            const box = document.getElementById(boxId);
+            const urlSpan = document.getElementById(urlSpanId);
+            const content = document.getElementById(contentId);
+
+            box.style.display = 'block';
+            urlSpan.textContent = url;
+            content.textContent = 'Carregando...';
+
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                content.textContent = text;
+                return text;
+            } catch (error) {
+                content.textContent = 'Erro ao conectar à API: ' + error.message;
+                return null;
+            }
+        }
+
+        // 1. Endpoint Único
+        function executarCalculoUnico() {
+            const num1 = document.getElementById('calc-num1').value;
+            const num2 = document.getElementById('calc-num2').value;
+            const casas = document.getElementById('calc-casas').value;
+
+            let url = `/calculadora/calcular/${currentOp}?numero1=${encodeURIComponent(num1)}&numero2=${encodeURIComponent(num2)}`;
+            if (casas !== '' && casas !== '2') {
+                url += `&casasDecimais=${encodeURIComponent(casas)}`;
+            }
+
+            fetchEndpoint(url, 'result-box-calcular', 'url-calcular', 'content-calcular');
+        }
+
+        // 2. Soma
+        function executarSoma() {
+            const num1 = document.getElementById('soma-num1').value;
+            const num2 = document.getElementById('soma-num2').value;
+            const url = `/calculadora/somar/${encodeURIComponent(num1)}/${encodeURIComponent(num2)}`;
+            fetchEndpoint(url, 'result-box-soma', 'url-soma', 'content-soma');
+        }
+
+        // 3. Subtração
+        function executarSubtracao() {
+            const num1 = document.getElementById('sub-num1').value;
+            const num2 = document.getElementById('sub-num2').value;
+            const url = `/calculadora/subtrair?numero1=${encodeURIComponent(num1)}&numero2=${encodeURIComponent(num2)}`;
+            fetchEndpoint(url, 'result-box-sub', 'url-sub', 'content-sub');
+        }
+
+        // 4. Par ou Ímpar
+        function executarParOuImpar() {
+            const num = document.getElementById('par-num').value;
+            const url = `/calculadora/par-ou-impar/${encodeURIComponent(num)}`;
+            fetchEndpoint(url, 'result-box-par', 'url-par', 'content-par');
+        }
+
+        // 5. Análise de Número
+        async function executarAnalise() {
+            const num = document.getElementById('analise-num').value;
+            const url = `/calculadora/analisar/${encodeURIComponent(num)}`;
+            const text = await fetchEndpoint(url, 'result-box-analise', 'url-analise', 'content-analise');
+
+            if (text) {
+                const lines = text.split('\n');
+                const data = {};
+                lines.forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length >= 2) {
+                        data[parts[0].trim()] = parts.slice(1).join(':').trim();
+                    }
+                });
+
+                document.getElementById('metric-paridade').textContent = data['Par ou ímpar'] || '-';
+                document.getElementById('metric-sinal').textContent = data['Positivo, negativo ou zero'] || '-';
+                document.getElementById('metric-dobro').textContent = data['Dobro'] || '-';
+                document.getElementById('metric-metade').textContent = data['Metade'] || '-';
+                document.getElementById('metric-quadrado').textContent = data['Quadrado'] || '-';
+
+                document.getElementById('metrics-analise').style.display = 'grid';
+            }
+        }
+
+        // 6. Média
+        async function executarMedia() {
+            const n1 = document.getElementById('nota1').value;
+            const n2 = document.getElementById('nota2').value;
+            const n3 = document.getElementById('nota3').value;
+
+            const url = `/calculadora/media?nota1=${encodeURIComponent(n1)}&nota2=${encodeURIComponent(n2)}&nota3=${encodeURIComponent(n3)}`;
+            const text = await fetchEndpoint(url, 'result-box-media', 'url-media', 'content-media');
+
+            const banner = document.getElementById('banner-media');
+            const bannerText = document.getElementById('banner-text');
+            const bannerBadge = document.getElementById('banner-badge');
+
+            if (text) {
+                banner.className = 'status-banner';
+                banner.style.display = 'flex';
+
+                if (text.includes('APROVADO')) {
+                    banner.classList.add('aprovado');
+                    bannerText.textContent = '🎉 Parabéns! Aluno Aprovado com sucesso.';
+                    bannerBadge.textContent = 'MÉDIA >= 7.0';
+                } else if (text.includes('RECUPERAÇÃO')) {
+                    banner.classList.add('recuperacao');
+                    bannerText.textContent = '⚠️ Aluno em Recuperação. Necessita realizar avaliação final.';
+                    bannerBadge.textContent = '4.0 <= MÉDIA < 7.0';
+                } else {
+                    banner.classList.add('reprovado');
+                    bannerText.textContent = '❌ Aluno Reprovado.';
+                    bannerBadge.textContent = 'MÉDIA < 4.0';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -8,14 +8,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/calculadora")
+@Tag(name = "Calculadora", description = "Endpoints de operações matemáticas e análises numéricas")
 public class CalculadoraController {
 
     // 1. Endpoint de soma com @PathVariable
     // GET /calculadora/somar/{numero1}/{numero2}
     @GetMapping("/somar/{numero1}/{numero2}")
-    public String somar(@PathVariable double numero1, @PathVariable double numero2) {
+    @Operation(summary = "Soma dois números", description = "Recebe dois números por PathVariable e retorna a soma.")
+    public String somar(
+            @Parameter(description = "Primeiro número", example = "10") @PathVariable double numero1,
+            @Parameter(description = "Segundo número", example = "5") @PathVariable double numero2) {
         double resultado = numero1 + numero2;
         return formatarNumero(resultado);
     }
@@ -23,7 +31,10 @@ public class CalculadoraController {
     // 2. Endpoint de subtração com @RequestParam
     // GET /calculadora/subtrair?numero1=20&numero2=8
     @GetMapping("/subtrair")
-    public String subtrair(@RequestParam double numero1, @RequestParam double numero2) {
+    @Operation(summary = "Subtrai dois números", description = "Recebe dois números por RequestParam e retorna a subtração (numero1 - numero2).")
+    public String subtrair(
+            @Parameter(description = "Primeiro número", example = "20") @RequestParam double numero1,
+            @Parameter(description = "Segundo número", example = "8") @RequestParam double numero2) {
         double resultado = numero1 - numero2;
         return formatarNumero(resultado);
     }
@@ -32,11 +43,12 @@ public class CalculadoraController {
     // GET /calculadora/calcular/{operacao}?numero1=10&numero2=5
     // Suporta somar, subtrair, multiplicar e dividir com casasDecimais opcional (default 2)
     @GetMapping("/calcular/{operacao}")
+    @Operation(summary = "Endpoint único de cálculo", description = "Executa a operação informada no path (somar, subtrair, multiplicar, dividir) com parâmetros na query string.")
     public String calcular(
-            @PathVariable String operacao,
-            @RequestParam double numero1,
-            @RequestParam double numero2,
-            @RequestParam(defaultValue = "2") int casasDecimais) {
+            @Parameter(description = "Operação (somar, subtrair, multiplicar, dividir)", example = "multiplicar") @PathVariable String operacao,
+            @Parameter(description = "Primeiro número", example = "10") @RequestParam double numero1,
+            @Parameter(description = "Segundo número", example = "5") @RequestParam double numero2,
+            @Parameter(description = "Casas decimais para formatação (padrão 2)", example = "2") @RequestParam(defaultValue = "2") int casasDecimais) {
 
         String opNormalizada = operacao.trim().toLowerCase(Locale.ROOT);
         String nomeOperacao;
@@ -97,7 +109,9 @@ public class CalculadoraController {
     // 4. Par ou ímpar
     // GET /calculadora/par-ou-impar/{numero}
     @GetMapping("/par-ou-impar/{numero}")
-    public String parOuImpar(@PathVariable long numero) {
+    @Operation(summary = "Verifica par ou ímpar", description = "Informa se o número recebido via PathVariable é PAR ou ÍMPAR.")
+    public String parOuImpar(
+            @Parameter(description = "Número inteiro para verificação", example = "10") @PathVariable long numero) {
         if (numero % 2 == 0) {
             return "PAR";
         } else {
@@ -108,7 +122,9 @@ public class CalculadoraController {
     // 5. Análise de número
     // GET /calculadora/analisar/{numero}
     @GetMapping("/analisar/{numero}")
-    public String analisar(@PathVariable double numero) {
+    @Operation(summary = "Análise completa do número", description = "Retorna informações detalhadas do número: paridade, sinal, dobro, metade e quadrado.")
+    public String analisar(
+            @Parameter(description = "Número para análise", example = "10") @PathVariable double numero) {
         String paridade;
         if (numero % 1 == 0) {
             paridade = ((long) numero % 2 == 0) ? "PAR" : "ÍMPAR";
@@ -142,10 +158,11 @@ public class CalculadoraController {
     // Desafio adicional — cálculo de média
     // GET /calculadora/media?nota1=7&nota2=8&nota3=6
     @GetMapping("/media")
+    @Operation(summary = "Cálculo de média escolar", description = "Recebe três notas por RequestParam, calcula a média e define a situação: APROVADO, RECUPERAÇÃO ou REPROVADO.")
     public String calcularMedia(
-            @RequestParam double nota1,
-            @RequestParam double nota2,
-            @RequestParam double nota3) {
+            @Parameter(description = "Primeira nota", example = "7") @RequestParam double nota1,
+            @Parameter(description = "Segunda nota", example = "8") @RequestParam double nota2,
+            @Parameter(description = "Terceira nota", example = "6") @RequestParam double nota3) {
 
         double media = (nota1 + nota2 + nota3) / 3.0;
 
