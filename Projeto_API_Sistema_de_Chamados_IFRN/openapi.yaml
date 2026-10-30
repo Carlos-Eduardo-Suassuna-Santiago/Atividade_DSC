@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Chamados IFRN API
+  version: 1.0.0
+  description: API REST para cadastro e acompanhamento de chamados de suporte do IFRN.
+servers:
+  - url: http://localhost:8080
+    description: Ambiente local Docker
+
+tags:
+  - name: Setores
+  - name: Categorias
+  - name: Usuarios
+  - name: Chamados
+  - name: Chamados por usuario
+
+paths:
+  /setores:
+    get:
+      tags: [Setores]
+      summary: Listar setores
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: nome
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lista paginada de setores
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginaSetor' }
+    post:
+      tags: [Setores]
+      summary: Criar setor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SetorRequest' }
+            example: { nome: Biblioteca, sigla: BIB }
+      responses:
+        '200':
+          description: Setor criado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Setor' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /setores/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Setores]
+      summary: Consultar setor
+      responses:
+        '200':
+          description: Setor encontrado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Setor' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Setores]
+      summary: Atualizar setor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SetorRequest' }
+      responses:
+        '200':
+          description: Setor atualizado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Setor' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Setores]
+      summary: Excluir setor
+      responses:
+        '204': { description: Setor excluido }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /categorias:
+    get:
+      tags: [Categorias]
+      summary: Listar categorias
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: nome
+          in: query
+          schema: { type: string }
+        - name: setorId
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista paginada de categorias
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaCategoria' } } }
+    post:
+      tags: [Categorias]
+      summary: Criar categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CategoriaRequest' }
+            example: { nome: Impressoras, descricao: Falhas em impressoras, setorId: 1 }
+      responses:
+        '200':
+          description: Categoria criada
+          content: { application/json: { schema: { $ref: '#/components/schemas/Categoria' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /categorias/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Categorias]
+      summary: Consultar categoria
+      responses:
+        '200':
+          description: Categoria encontrada
+          content: { application/json: { schema: { $ref: '#/components/schemas/Categoria' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Categorias]
+      summary: Atualizar categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CategoriaRequest' }
+      responses:
+        '200':
+          description: Categoria atualizada
+          content: { application/json: { schema: { $ref: '#/components/schemas/Categoria' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Categorias]
+      summary: Excluir categoria
+      responses:
+        '204': { description: Categoria excluida }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /setores/{id}/categorias:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Categorias]
+      summary: Listar categorias de um setor
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Categorias do setor
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaCategoria' } } }
+
+  /usuarios:
+    get:
+      tags: [Usuarios]
+      summary: Listar usuarios
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: nome
+          in: query
+          schema: { type: string }
+        - name: tipo
+          in: query
+          schema: { $ref: '#/components/schemas/TipoUsuario' }
+        - name: setorId
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista paginada de usuarios
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaUsuario' } } }
+    post:
+      tags: [Usuarios]
+      summary: Criar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UsuarioRequest' }
+            examples:
+              solicitante:
+                value: { nome: Novo solicitante, email: novo@ifrn.edu.br, matricula: '20260003', tipo: SOLICITANTE }
+              tecnico:
+                value: { nome: Novo tecnico, email: tecnico@ifrn.edu.br, matricula: SERV004, tipo: TECNICO, setorId: 1 }
+      responses:
+        '200':
+          description: Usuario criado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Usuario' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /usuarios/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Usuarios]
+      summary: Consultar usuario
+      responses:
+        '200':
+          description: Usuario encontrado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Usuario' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Usuarios]
+      summary: Atualizar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UsuarioRequest' }
+      responses:
+        '200':
+          description: Usuario atualizado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Usuario' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /chamados:
+    get:
+      tags: [Chamados]
+      summary: Listar e filtrar chamados
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/StatusChamado' }
+        - name: prioridade
+          in: query
+          schema: { $ref: '#/components/schemas/Prioridade' }
+        - name: setorId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: categoriaId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: solicitanteId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: tecnicoId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: dataInicio
+          in: query
+          schema: { type: string, format: date-time }
+        - name: dataFim
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Lista paginada de chamados
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaChamado' } } }
+    post:
+      tags: [Chamados]
+      summary: Abrir chamado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChamadoRequest' }
+            example:
+              titulo: Computador sem video
+              descricao: O monitor nao liga
+              local: Laboratorio 2
+              prioridade: ALTA
+              solicitanteId: 1
+              categoriaId: 1
+      responses:
+        '201':
+          description: Chamado criado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Chamado' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /chamados/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Chamados]
+      summary: Consultar chamado e historico
+      responses:
+        '200':
+          description: Chamado encontrado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Chamado' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /chamados/{id}/assumir:
+    patch:
+      tags: [Chamados]
+      summary: Assumir chamado
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AcaoRequest' }
+            example: { usuarioId: 3 }
+      responses:
+        '200':
+          description: Chamado assumido
+          content: { application/json: { schema: { $ref: '#/components/schemas/Chamado' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /chamados/{id}/resolver:
+    patch:
+      tags: [Chamados]
+      summary: Resolver chamado
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SolucaoRequest' }
+            example: { tecnicoId: 3, solucao: Cabo substituido e equipamento testado }
+      responses:
+        '200':
+          description: Chamado resolvido
+          content: { application/json: { schema: { $ref: '#/components/schemas/Chamado' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /chamados/{id}/cancelar:
+    patch:
+      tags: [Chamados]
+      summary: Cancelar chamado
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AcaoRequest' }
+            example: { usuarioId: 1 }
+      responses:
+        '200':
+          description: Chamado cancelado
+          content: { application/json: { schema: { $ref: '#/components/schemas/Chamado' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /chamados/{id}/interacoes:
+    post:
+      tags: [Chamados]
+      summary: Registrar interacao
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InteracaoRequest' }
+            example: { texto: Estou verificando o equipamento, autorId: 3 }
+      responses:
+        '201':
+          description: Interacao criada
+          content: { application/json: { schema: { $ref: '#/components/schemas/Interacao' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /usuarios/{id}/chamados:
+    get:
+      tags: [Chamados por usuario]
+      summary: Listar chamados de um usuario
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/StatusChamado' }
+      responses:
+        '200':
+          description: Chamados relacionados ao usuario
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaChamado' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64, example: 1 }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+    Sort:
+      name: sort
+      in: query
+      schema: { type: string, example: dataAbertura,desc }
+
+  responses:
+    BadRequest:
+      description: Requisicao invalida ou JSON malformado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Erro' } } }
+    NotFound:
+      description: Recurso nao encontrado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Erro' } } }
+    Conflict:
+      description: Regra de negocio violada ou recurso duplicado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Erro' } } }
+
+  schemas:
+    SetorRequest:
+      type: object
+      required: [nome, sigla]
+      properties:
+        nome: { type: string, example: Biblioteca }
+        sigla: { type: string, example: BIB }
+    Setor:
+      allOf:
+        - $ref: '#/components/schemas/SetorRequest'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, example: 1 }
+    CategoriaRequest:
+      type: object
+      required: [nome, setorId]
+      properties:
+        nome: { type: string, example: Computadores }
+        descricao: { type: string, nullable: true, example: Equipamentos de informatica }
+        setorId: { type: integer, format: int64, example: 1 }
+    Categoria:
+      allOf:
+        - $ref: '#/components/schemas/CategoriaRequest'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, example: 1 }
+    TipoUsuario:
+      type: string
+      enum: [SOLICITANTE, TECNICO]
+    UsuarioRequest:
+      type: object
+      required: [nome, email, matricula, tipo]
+      properties:
+        nome: { type: string, example: Ana Solicitante }
+        email: { type: string, format: email, example: ana@ifrn.edu.br }
+        matricula: { type: string, example: '20260001' }
+        tipo: { $ref: '#/components/schemas/TipoUsuario' }
+        setorId: { type: integer, format: int64, nullable: true, example: 1 }
+    Usuario:
+      allOf:
+        - $ref: '#/components/schemas/UsuarioRequest'
+        - type: object
+          properties:
+            id: { type: integer, format: int64, example: 1 }
+    Prioridade:
+      type: string
+      enum: [BAIXA, MEDIA, ALTA]
+    StatusChamado:
+      type: string
+      enum: [ABERTO, EM_ATENDIMENTO, RESOLVIDO, CANCELADO]
+    ChamadoRequest:
+      type: object
+      required: [titulo, descricao, local, solicitanteId, categoriaId]
+      properties:
+        titulo: { type: string, example: Computador sem video }
+        descricao: { type: string, example: O monitor nao liga }
+        local: { type: string, example: Laboratorio 2 }
+        prioridade: { $ref: '#/components/schemas/Prioridade' }
+        solicitanteId: { type: integer, format: int64, example: 1 }
+        categoriaId: { type: integer, format: int64, example: 1 }
+    AcaoRequest:
+      type: object
+      required: [usuarioId]
+      properties:
+        usuarioId: { type: integer, format: int64, example: 3 }
+    SolucaoRequest:
+      type: object
+      required: [solucao, tecnicoId]
+      properties:
+        solucao: { type: string, example: Cabo substituido e equipamento testado }
+        tecnicoId: { type: integer, format: int64, example: 3 }
+    InteracaoRequest:
+      type: object
+      required: [texto, autorId]
+      properties:
+        texto: { type: string, example: Estou verificando o equipamento }
+        autorId: { type: integer, format: int64, example: 3 }
+    Interacao:
+      type: object
+      properties:
+        id: { type: integer, format: int64, example: 1 }
+        texto: { type: string }
+        dataHora: { type: string, format: date-time }
+        autorId: { type: integer, format: int64 }
+        autorNome: { type: string }
+    Chamado:
+      type: object
+      properties:
+        id: { type: integer, format: int64, example: 1 }
+        titulo: { type: string }
+        descricao: { type: string }
+        local: { type: string }
+        prioridade: { $ref: '#/components/schemas/Prioridade' }
+        status: { $ref: '#/components/schemas/StatusChamado' }
+        dataAbertura: { type: string, format: date-time }
+        dataFechamento: { type: string, format: date-time, nullable: true }
+        solucao: { type: string, nullable: true }
+        solicitanteId: { type: integer, format: int64 }
+        categoriaId: { type: integer, format: int64 }
+        setorId: { type: integer, format: int64 }
+        tecnicoId: { type: integer, format: int64, nullable: true }
+        interacoes:
+          type: array
+          items: { $ref: '#/components/schemas/Interacao' }
+    Erro:
+      type: object
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, example: 409 }
+        mensagem: { type: string, example: Regra de negocio violada. }
+        caminho: { type: string, example: /chamados/1/resolver }
+    PaginaSetor:
+      $ref: '#/components/schemas/Pagina'
+    PaginaCategoria:
+      $ref: '#/components/schemas/Pagina'
+    PaginaUsuario:
+      $ref: '#/components/schemas/Pagina'
+    PaginaChamado:
+      $ref: '#/components/schemas/Pagina'
+    Pagina:
+      type: object
+      properties:
+        itens: { type: array, items: {} }
+        pagina: { type: integer, example: 0 }
+        tamanho: { type: integer, example: 10 }
+        totalElementos: { type: integer, format: int64, example: 4 }
+        totalPaginas: { type: integer, example: 1 }

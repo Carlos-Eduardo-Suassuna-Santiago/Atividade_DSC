@@ -1,0 +1,117 @@
+{
+  "info": {
+    "name": "Sistema de Chamados IFRN - Newman",
+    "description": "Colecao Postman v2.1 para execucao automatizada com Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.variables.get('test_suffix')) {",
+          "  pm.variables.set('test_suffix', Date.now().toString().slice(-6));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "test_suffix", "value": "" },
+    { "key": "setor_id", "value": "1" },
+    { "key": "categoria_id", "value": "1" },
+    { "key": "solicitante_id", "value": "1" },
+    { "key": "tecnico_id", "value": "3" },
+    { "key": "tecnico_outro_setor_id", "value": "4" },
+    { "key": "chamado_id", "value": "1" },
+    { "key": "cancel_id", "value": "1" },
+    { "key": "created_setor_id", "value": "" },
+    { "key": "created_categoria_id", "value": "" },
+    { "key": "created_usuario_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Setores",
+      "item": [
+        { "name": "Listar setores", "request": { "method": "GET", "header": [], "url": "{{base_url}}/setores?page=0&size=10" } },
+        { "name": "Filtrar setores", "request": { "method": "GET", "header": [], "url": "{{base_url}}/setores?nome=tec&page=0&size=10" } },
+        { "name": "Consultar setor", "request": { "method": "GET", "header": [], "url": "{{base_url}}/setores/{{setor_id}}" } },
+        {
+          "name": "Criar setor de teste",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Biblioteca Newman {{test_suffix}}\",\n  \"sigla\": \"NWM{{test_suffix}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/setores" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Setor criado', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));", "pm.variables.set('created_setor_id', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Atualizar setor de teste",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Biblioteca Newman Atualizada {{test_suffix}}\",\n  \"sigla\": \"NWM{{test_suffix}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/setores/{{created_setor_id}}" }
+        },
+        { "name": "Excluir setor de teste", "request": { "method": "DELETE", "header": [], "url": "{{base_url}}/setores/{{created_setor_id}}" } }
+      ]
+    },
+    {
+      "name": "02 - Categorias",
+      "item": [
+        { "name": "Listar categorias", "request": { "method": "GET", "header": [], "url": "{{base_url}}/categorias?page=0&size=10" } },
+        { "name": "Filtrar categorias", "request": { "method": "GET", "header": [], "url": "{{base_url}}/categorias?nome=rede&setorId={{setor_id}}&page=0&size=10" } },
+        { "name": "Categorias do setor", "request": { "method": "GET", "header": [], "url": "{{base_url}}/setores/{{setor_id}}/categorias?page=0&size=10" } },
+        { "name": "Consultar categoria", "request": { "method": "GET", "header": [], "url": "{{base_url}}/categorias/{{categoria_id}}" } },
+        {
+          "name": "Criar categoria de teste",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Categoria Newman {{test_suffix}}\",\n  \"descricao\": \"Categoria criada pelo Newman\",\n  \"setorId\": {{setor_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/categorias" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Categoria criada', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));", "pm.variables.set('created_categoria_id', pm.response.json().id);"] } }]
+        },
+        { "name": "Atualizar categoria de teste", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Categoria Newman Atualizada {{test_suffix}}\",\n  \"descricao\": \"Categoria atualizada pelo Newman\",\n  \"setorId\": {{setor_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/categorias/{{created_categoria_id}}" } },
+        { "name": "Excluir categoria de teste", "request": { "method": "DELETE", "header": [], "url": "{{base_url}}/categorias/{{created_categoria_id}}" } }
+      ]
+    },
+    {
+      "name": "03 - Usuarios",
+      "item": [
+        { "name": "Listar usuarios", "request": { "method": "GET", "header": [], "url": "{{base_url}}/usuarios?page=0&size=10" } },
+        { "name": "Filtrar tecnicos", "request": { "method": "GET", "header": [], "url": "{{base_url}}/usuarios?tipo=TECNICO&setorId={{setor_id}}&page=0&size=10" } },
+        { "name": "Consultar usuario", "request": { "method": "GET", "header": [], "url": "{{base_url}}/usuarios/{{solicitante_id}}" } },
+        {
+          "name": "Criar solicitante de teste",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Solicitante Newman {{test_suffix}}\",\n  \"email\": \"newman{{test_suffix}}@ifrn.edu.br\",\n  \"matricula\": \"NWM{{test_suffix}}\",\n  \"tipo\": \"SOLICITANTE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/usuarios" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Usuario criado', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));", "pm.variables.set('created_usuario_id', pm.response.json().id);"] } }]
+        },
+        { "name": "Atualizar solicitante de teste", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Solicitante Newman Atualizado {{test_suffix}}\",\n  \"email\": \"newman{{test_suffix}}@ifrn.edu.br\",\n  \"matricula\": \"NWM{{test_suffix}}\",\n  \"tipo\": \"SOLICITANTE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/usuarios/{{created_usuario_id}}" } }
+      ]
+    },
+    {
+      "name": "04 - Chamados",
+      "item": [
+        { "name": "Listar chamados", "request": { "method": "GET", "header": [], "url": "{{base_url}}/chamados?page=0&size=10&sort=dataAbertura,desc" } },
+        { "name": "Filtrar chamados", "request": { "method": "GET", "header": [], "url": "{{base_url}}/chamados?status=ABERTO&prioridade=ALTA&setorId={{setor_id}}&categoriaId={{categoria_id}}&page=0&size=10" } },
+        {
+          "name": "Abrir chamado de teste",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Computador Newman {{test_suffix}}\",\n  \"descricao\": \"O monitor nao liga\",\n  \"local\": \"Laboratorio 2\",\n  \"prioridade\": \"ALTA\",\n  \"solicitanteId\": {{solicitante_id}},\n  \"categoriaId\": {{categoria_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Chamado criado', () => pm.expect(pm.response.code).to.equal(201));", "pm.variables.set('chamado_id', pm.response.json().id);"] } }]
+        },
+        { "name": "Consultar chamado", "request": { "method": "GET", "header": [], "url": "{{base_url}}/chamados/{{chamado_id}}" } },
+        { "name": "Assumir chamado", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"usuarioId\": {{tecnico_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados/{{chamado_id}}/assumir" } },
+        { "name": "Interacao do tecnico", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"texto\": \"Estou verificando o equipamento pelo Newman.\",\n  \"autorId\": {{tecnico_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados/{{chamado_id}}/interacoes" } },
+        { "name": "Interacao do solicitante", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"texto\": \"O problema continua acontecendo.\",\n  \"autorId\": {{solicitante_id}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados/{{chamado_id}}/interacoes" } },
+        { "name": "Resolver chamado", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tecnicoId\": {{tecnico_id}},\n  \"solucao\": \"Cabo substituido e equipamento testado.\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados/{{chamado_id}}/resolver" } },
+        {
+          "name": "Abrir chamado cancelavel",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Cancelamento Newman {{test_suffix}}\",\n  \"descricao\": \"Teste de cancelamento\",\n  \"local\": \"Sala 1\",\n  \"solicitanteId\": 2,\n  \"categoriaId\": 2\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Chamado cancelavel criado', () => pm.expect(pm.response.code).to.equal(201));", "pm.variables.set('cancel_id', pm.response.json().id);"] } }]
+        },
+        { "name": "Cancelar chamado", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"usuarioId\": 2\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/chamados/{{cancel_id}}/cancelar" } },
+        { "name": "Chamados do solicitante", "request": { "method": "GET", "header": [], "url": "{{base_url}}/usuarios/{{solicitante_id}}/chamados?page=0&size=10" } }
+      ]
+    },
+    {
+      "name": "05 - Testes negativos",
+      "item": [
+        { "name": "400 - campo obrigatorio", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/setores" } },
+        { "name": "404 - recurso inexistente", "request": { "method": "GET", "header": [], "url": "{{base_url}}/chamados/99999" } },
+        { "name": "409 - sigla duplicada", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Outro COTIC\",\n  \"sigla\": \"COTIC\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/setores" } },
+        { "name": "409 - tecnico sem setor", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Tecnico Newman {{test_suffix}}\",\n  \"email\": \"tecnico-newman{{test_suffix}}@ifrn.edu.br\",\n  \"matricula\": \"TEC{{test_suffix}}\",\n  \"tipo\": \"TECNICO\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/usuarios" } }
+      ]
+    }
+  ]
+}

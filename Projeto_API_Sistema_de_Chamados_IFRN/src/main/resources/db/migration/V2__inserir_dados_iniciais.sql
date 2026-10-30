@@ -1,0 +1,3 @@
+INSERT INTO setores(nome,sigla) VALUES ('Coordenação de Tecnologia da Informação','COTIC'),('Setor de Manutenção','MANUT');
+INSERT INTO categorias(nome,descricao,setor_id) VALUES ('Computadores','Equipamentos de informática',1),('Rede e Wi-Fi','Conectividade e internet',1),('Elétrica','Instalações elétricas',2),('Projetores','Equipamentos audiovisuais',2);
+INSERT INTO usuarios(nome,email,matricula,tipo,setor_id) VALUES ('Ana Solicitante','ana@aluno.ifrn.edu.br','20260001','SOLICITANTE',NULL),('Bruno Solicitante','bruno@aluno.ifrn.edu.br','20260002','SOLICITANTE',NULL),('Carlos Técnico','carlos@func.ifrn.edu.br','SERV001','TECNICO',1),('Diana Técnica','diana@func.ifrn.edu.br','SERV002','TECNICO',2);

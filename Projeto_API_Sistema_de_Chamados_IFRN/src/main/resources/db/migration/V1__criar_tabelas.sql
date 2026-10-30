@@ -1,0 +1,7 @@
+CREATE TABLE setores (id BIGSERIAL PRIMARY KEY, nome VARCHAR(120) NOT NULL, sigla VARCHAR(20) NOT NULL, CONSTRAINT uk_setor_sigla UNIQUE(sigla));
+CREATE TABLE categorias (id BIGSERIAL PRIMARY KEY, nome VARCHAR(120) NOT NULL, descricao VARCHAR(500), setor_id BIGINT NOT NULL REFERENCES setores(id));
+CREATE TABLE usuarios (id BIGSERIAL PRIMARY KEY, nome VARCHAR(150) NOT NULL, email VARCHAR(180) NOT NULL, matricula VARCHAR(30) NOT NULL, tipo VARCHAR(20) NOT NULL, setor_id BIGINT REFERENCES setores(id), CONSTRAINT uk_usuario_email UNIQUE(email), CONSTRAINT ck_usuario_tipo CHECK(tipo IN ('SOLICITANTE','TECNICO')));
+CREATE TABLE chamados (id BIGSERIAL PRIMARY KEY, titulo VARCHAR(180) NOT NULL, descricao VARCHAR(2000) NOT NULL, local VARCHAR(180) NOT NULL, prioridade VARCHAR(10) NOT NULL, status VARCHAR(20) NOT NULL, data_abertura TIMESTAMP NOT NULL, data_fechamento TIMESTAMP, solucao VARCHAR(2000), solicitante_id BIGINT NOT NULL REFERENCES usuarios(id), categoria_id BIGINT NOT NULL REFERENCES categorias(id), tecnico_id BIGINT REFERENCES usuarios(id));
+CREATE TABLE interacoes (id BIGSERIAL PRIMARY KEY, texto VARCHAR(2000) NOT NULL, data_hora TIMESTAMP NOT NULL, chamado_id BIGINT NOT NULL REFERENCES chamados(id), autor_id BIGINT NOT NULL REFERENCES usuarios(id));
+ALTER TABLE chamados ADD CONSTRAINT ck_chamado_prioridade CHECK(prioridade IN ('BAIXA','MEDIA','ALTA'));
+ALTER TABLE chamados ADD CONSTRAINT ck_chamado_status CHECK(status IN ('ABERTO','EM_ATENDIMENTO','RESOLVIDO','CANCELADO'));

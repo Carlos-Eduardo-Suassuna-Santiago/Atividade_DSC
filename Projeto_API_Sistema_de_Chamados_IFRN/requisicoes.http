@@ -1,0 +1,71 @@
+### Setores
+POST http://localhost:8080/setores
+Content-Type: application/json
+
+{"nome":"Biblioteca","sigla":"BIB"}
+
+###
+GET http://localhost:8080/setores?nome=tec&page=0&size=10
+###
+GET http://localhost:8080/setores/1
+###
+PUT http://localhost:8080/setores/1
+Content-Type: application/json
+
+{"nome":"COTIC","sigla":"COTIC"}
+
+###
+DELETE http://localhost:8080/setores/1
+
+### Categorias e usuários
+POST http://localhost:8080/categorias
+Content-Type: application/json
+
+{"nome":"Impressoras","descricao":"Falhas em impressoras","setorId":1}
+
+###
+GET http://localhost:8080/categorias?nome=rede&setorId=1&page=0&size=10
+###
+GET http://localhost:8080/setores/1/categorias?page=0&size=10
+###
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{"nome":"Novo solicitante","email":"novo@ifrn.edu.br","matricula":"20260003","tipo":"SOLICITANTE"}
+
+### Chamados
+POST http://localhost:8080/chamados
+Content-Type: application/json
+
+{"titulo":"Wi-Fi indisponível","descricao":"Sem conexão no laboratório","local":"Lab 1","prioridade":"ALTA","solicitanteId":1,"categoriaId":2}
+
+###
+GET http://localhost:8080/chamados?status=ABERTO&prioridade=ALTA&page=0&size=10&sort=dataAbertura,desc
+###
+GET http://localhost:8080/chamados/1
+###
+PATCH http://localhost:8080/chamados/1/assumir
+Content-Type: application/json
+
+{"usuarioId":3}
+
+###
+POST http://localhost:8080/chamados/1/interacoes
+Content-Type: application/json
+
+{"texto":"Estou verificando o roteador.","autorId":3}
+
+###
+PATCH http://localhost:8080/chamados/1/resolver
+Content-Type: application/json
+
+{"tecnicoId":3,"solucao":"Roteador reiniciado e conexão restabelecida."}
+
+###
+PATCH http://localhost:8080/chamados/1/cancelar
+Content-Type: application/json
+
+{"usuarioId":1}
+
+###
+GET http://localhost:8080/usuarios/1/chamados?status=ABERTO&page=0&size=10
